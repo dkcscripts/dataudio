@@ -2,12 +2,7 @@
 
 Encode a file into a WAV file that can be played through a speaker,
 recorded by another device's microphone (e.g. a phone), transferred,
-and decoded back into the original file — no network required.
-
-Reliability was the explicit design priority over speed/throughput,
-and the design has been validated end-to-end on a **real speaker →
-air → phone microphone recording → transfer → decode** round trip,
-not just in-software simulation.
+and decoded back into the original file - no network required.
 
 ## How it works
 
@@ -27,7 +22,7 @@ not just in-software simulation.
   per-byte error rates on some channels (likely speaker
   intermodulation distortion from driving 8 simultaneous tones).
   CRC-only detection cannot succeed at that error rate, so the entire
-  frame is Reed-Solomon coded, RS(255,128) — 128 data bytes + 127
+  frame is Reed-Solomon coded, RS(255,128) - 128 data bytes + 127
   parity bytes per block, correcting up to 63/255 (~24.7%) erroneous
   bytes per block. CRC-32 is layered on top as a final integrity
   check after RS correction.
@@ -77,7 +72,7 @@ modulation, this trades throughput hard for robustness. At
 - ~2.2 KB payload → ~50s of audio
 - 2 MB payload → very roughly ~11-12 hours of audio, ~3.5 GB WAV file
 
-Plan storage and transfer time accordingly — this is meant for
+Plan storage and transfer time accordingly - this is meant for
 small-to-medium files (configs, keys, archives) where reliability over
 an acoustic channel matters more than speed.
 
@@ -88,12 +83,12 @@ pip install pytest
 pytest tests/
 ```
 
-- `tests/test_loopback.py` — encodes a random payload straight to an
+- `tests/test_loopback.py` - encodes a random payload straight to an
   in-memory waveform and decodes it again (no recording involved), to
   validate the codec logic itself: round trips, RS-corrected minor
   corruption, safely-failing heavy corruption, and crossing a resync
   boundary.
-- `tests/test_synthetic_channel.py` — degrades the encoded waveform in
+- `tests/test_synthetic_channel.py` - degrades the encoded waveform in
   ways a real speaker/air/microphone/recording-app pipeline would
   (noise, clock drift via resampling, amplitude scaling, clipping,
   band-limiting) and checks decoding still succeeds within realistic
@@ -116,7 +111,7 @@ pytest tests/
 - **Real hardware**: confirmed working on an actual speaker → air →
   phone microphone recording → file transfer → decode round trip,
   after two real-world-driven fixes (frequency floor, then Reed-Solomon
-  FEC — see "Design history" below).
+  FEC - see "Design history" below).
 
 ## Design history / known issues found via real-device testing
 
@@ -127,12 +122,12 @@ pytest tests/
    recording showed ~16-19% per-byte error rates concentrated on 2 of
    8 channels, consistent with speaker intermodulation distortion.
    CRC-only detection (the original v1 design) can never succeed at
-   that error rate for any payload of practical size — fixed by adding
+   that error rate for any payload of practical size - fixed by adding
    Reed-Solomon FEC, verified against the exact measured error profile
    via simulation (20/20 trials) before the real-world confirmation.
 
 If you hit further real-world failures, run the decoder with
-`--debug` and share the output plus the recording — the diagnostic
+`--debug` and share the output plus the recording - the diagnostic
 report (pilot burst positions/durations, segment timing, per-block RS
 error counts, which block failed) is usually enough to pinpoint the
 next issue quickly, the same way it was used for the two fixes above.
